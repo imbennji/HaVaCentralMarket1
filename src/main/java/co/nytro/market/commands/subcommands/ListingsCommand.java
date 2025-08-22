@@ -2,6 +2,7 @@ package co.nytro.market.commands.subcommands;
 
 import co.nytro.market.datastores.UIBuilder;
 import co.nytro.market.Market;
+import com.codehusky.huskyui.StateContainer;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
@@ -17,8 +18,12 @@ public class ListingsCommand implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) {
         if (pl.isHuskyUILoaded() && pl.isChestGUIDefault()) {
-            if (args.hasAny("g")) pl.getDataStore().getListingsPagination().sendTo(src);
-            else UIBuilder.getStateContainer(pl.getDataStore().getListings()).launchFor((Player) src);
+            if (args.hasAny("g")) {
+                pl.getDataStore().getListingsPagination().sendTo(src);
+            } else {
+                StateContainer sc = UIBuilder.getStateContainer(pl.getDataStore().getListings());
+                sc.launchFor((Player) src);
+            }
         } else {
             pl.getDataStore().getListingsPagination().sendTo(src);
         }
