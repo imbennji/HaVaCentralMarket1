@@ -23,6 +23,8 @@ public class UIBuilder {
 
     public static Optional<StateContainer> getStateContainer(List<Listing> listings) {
         final int pageSize = 9 * 5; // Reserve bottom row for controls
+        final int bottomRowStart = pageSize; // slot 45 in a 9x6 grid
+        final int bottomRowEnd = bottomRowStart + 8; // slot 53
         int totalPages = (int) Math.ceil(listings.size() / (double) pageSize);
 
         if (totalPages == 0) {
@@ -44,11 +46,24 @@ public class UIBuilder {
                             .add(Keys.DISPLAY_NAME, Text.of(""))
                             .build());
 
+            int slot = 0;
             for (Listing listing : listings.subList(start, end)) {
-                p.addElement(getElementFromListing(listing, sc));
+                p.addElement(getElementFromListing(listing, sc), slot++);
             }
 
             String id = String.format("Market Page %d", page + 1);
+
+            // Fill bottom control row with filler panes
+            ItemStack fillerStack = ItemStack.builder()
+                    .itemType(ItemTypes.STAINED_GLASS_PANE)
+                    .add(Keys.DYE_COLOR, DyeColors.GREEN)
+                    .add(Keys.DISPLAY_NAME, Text.of(""))
+                    .build();
+            ActionableElement fillerElement = new ActionableElement(
+                    new RunnableAction(sc, ActionType.CLOSE, id, player -> {}), fillerStack);
+            for (int i = bottomRowStart; i <= bottomRowEnd; i++) {
+                p.addElement(fillerElement, i);
+            }
 
             // Previous page button
             if (page > 0) {
@@ -58,7 +73,7 @@ public class UIBuilder {
                         .build();
                 RunnableAction prevAction = new RunnableAction(sc, ActionType.CLOSE, id,
                         player -> sc.launchFor(player, String.format("Market Page %d", page)));
-                p.addElement(new ActionableElement(prevAction, prevStack));
+                p.addElement(new ActionableElement(prevAction, prevStack), bottomRowStart);
             }
 
             // Next page button
@@ -69,7 +84,7 @@ public class UIBuilder {
                         .build();
                 RunnableAction nextAction = new RunnableAction(sc, ActionType.CLOSE, id,
                         player -> sc.launchFor(player, String.format("Market Page %d", page + 2)));
-                p.addElement(new ActionableElement(nextAction, nextStack));
+                p.addElement(new ActionableElement(nextAction, nextStack), bottomRowEnd);
             }
 
             sc.addState(p.build(id));
