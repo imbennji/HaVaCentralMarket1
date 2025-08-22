@@ -3,6 +3,9 @@ package co.nytro.market.commands.subcommands;
 import co.nytro.market.datastores.UIBuilder;
 import co.nytro.market.Market;
 import com.codehusky.huskyui.StateContainer;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
+import java.util.Optional;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
@@ -21,8 +24,12 @@ public class ListingsCommand implements CommandExecutor {
             if (args.hasAny("g")) {
                 pl.getDataStore().getListingsPagination().sendTo(src);
             } else {
-                StateContainer sc = UIBuilder.getStateContainer(pl.getDataStore().getListings());
-                sc.launchFor((Player) src, "Market Page 1");
+                Optional<StateContainer> scOpt = UIBuilder.getStateContainer(pl.getDataStore().getListings());
+                if (scOpt.isPresent()) {
+                    scOpt.get().launchFor((Player) src, "Market Page 1");
+                } else {
+                    src.sendMessage(Text.of(TextColors.RED, "No listings available."));
+                }
             }
         } else {
             pl.getDataStore().getListingsPagination().sendTo(src);
