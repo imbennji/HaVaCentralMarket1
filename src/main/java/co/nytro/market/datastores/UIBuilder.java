@@ -17,14 +17,19 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class UIBuilder {
 
-    public static StateContainer getStateContainer(List<Listing> listings) {
-        StateContainer sc = new StateContainer();
-
+    public static Optional<StateContainer> getStateContainer(List<Listing> listings) {
         final int pageSize = 9 * 5; // Reserve bottom row for controls
         int totalPages = (int) Math.ceil(listings.size() / (double) pageSize);
+
+        if (totalPages == 0) {
+            return Optional.empty();
+        }
+
+        StateContainer sc = new StateContainer();
 
         for (int page = 0; page < totalPages; page++) {
             int start = page * pageSize;
@@ -70,7 +75,7 @@ public class UIBuilder {
             sc.addState(p.build(id));
         }
 
-        return sc;
+        return Optional.of(sc);
     }
 
     private static ActionableElement getElementFromListing(Listing listing, StateContainer sc) {
