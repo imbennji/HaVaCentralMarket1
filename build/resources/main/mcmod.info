@@ -1,0 +1,19 @@
+[
+    {
+        "modid": "market",
+        "name": "Market",
+        "version": "@VERSION@",
+        "description": "Market",
+        "url": "https://nytro.co",
+        "authorList": [
+            "TimeTheCat"
+        ],
+        "dependencies": [
+            "spongeapi@7.5.0-SNAPSHOT",
+            "huskyui"
+        ],
+        "requiredMods": [
+            "spongeapi@7.5.0-SNAPSHOT"
+        ]
+    }
+]
