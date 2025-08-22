@@ -22,20 +22,54 @@ public class UIBuilder {
 
     public static StateContainer getStateContainer(List<Listing> listings) {
         StateContainer sc = new StateContainer();
-        //State initalState = null;
-        Page.PageBuilder p = Page.builder()
-                .setAutoPaging(true)
-                .setTitle(Texts.MARKET_BASE)
-                .setInventoryDimension(InventoryDimension.of(9, 6))
-                .setEmptyStack(ItemStack.builder()
-                        .itemType(ItemTypes.STAINED_GLASS_PANE)
-                        .add(Keys.DYE_COLOR, DyeColors.GREEN)
-                        .add(Keys.DISPLAY_NAME, Text.of("")
-                        ).build());
-        for (Listing listing : listings) {
-            p.addElement(getElementFromListing(listing, sc));
+
+        final int pageSize = 9 * 5; // Reserve bottom row for controls
+        int totalPages = (int) Math.ceil(listings.size() / (double) pageSize);
+
+        for (int page = 0; page < totalPages; page++) {
+            int start = page * pageSize;
+            int end = Math.min(start + pageSize, listings.size());
+
+            Page.PageBuilder p = Page.builder()
+                    .setTitle(Texts.MARKET_BASE)
+                    .setInventoryDimension(InventoryDimension.of(9, 6))
+                    .setEmptyStack(ItemStack.builder()
+                            .itemType(ItemTypes.STAINED_GLASS_PANE)
+                            .add(Keys.DYE_COLOR, DyeColors.GREEN)
+                            .add(Keys.DISPLAY_NAME, Text.of(""))
+                            .build());
+
+            for (Listing listing : listings.subList(start, end)) {
+                p.addElement(getElementFromListing(listing, sc));
+            }
+
+            String id = String.format("Market Page %d", page + 1);
+
+            // Previous page button
+            if (page > 0) {
+                ItemStack prevStack = ItemStack.builder()
+                        .itemType(ItemTypes.ARROW)
+                        .add(Keys.DISPLAY_NAME, Text.of("Prev"))
+                        .build();
+                RunnableAction prevAction = new RunnableAction(sc, ActionType.CLOSE, id,
+                        player -> sc.launchFor(player, String.format("Market Page %d", page)));
+                p.addElement(new ActionableElement(prevAction, prevStack));
+            }
+
+            // Next page button
+            if (page < totalPages - 1) {
+                ItemStack nextStack = ItemStack.builder()
+                        .itemType(ItemTypes.ARROW)
+                        .add(Keys.DISPLAY_NAME, Text.of("Next"))
+                        .build();
+                RunnableAction nextAction = new RunnableAction(sc, ActionType.CLOSE, id,
+                        player -> sc.launchFor(player, String.format("Market Page %d", page + 2)));
+                p.addElement(new ActionableElement(nextAction, nextStack));
+            }
+
+            sc.addState(p.build(id));
         }
-        sc.addState(p.build("Main Market"));
+
         return sc;
     }
 
